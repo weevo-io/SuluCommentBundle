@@ -32,20 +32,23 @@ class Kernel extends SuluTestKernel
         return $bundles;
     }
 
-    public function registerContainerConfiguration(LoaderInterface $loader)
+    public function registerContainerConfiguration(LoaderInterface $loader): void
     {
         parent::registerContainerConfiguration($loader);
 
         $context = $this->getContext();
         $loader->load(__DIR__ . '/config/config_' . $context . '.yml');
 
-        if (\version_compare(Kernel::VERSION, '6.0.0', '>=')) {
-            $loader->load(__DIR__ . '/config/security-6.yml');
-        } else {
+        if (\class_exists(\Symfony\Bundle\SecurityBundle\Command\UserPasswordEncoderCommand::class)) { // detect Symfony <= 5.4
             $loader->load(__DIR__ . '/config/security-5-4.yml');
+        } else {
+            $loader->load(__DIR__ . '/config/security-6.yml');
         }
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     protected function getKernelParameters(): array
     {
         $parameters = parent::getKernelParameters();
