@@ -295,59 +295,6 @@ class WebsiteCommentController extends AbstractRestController implements ClassRe
     }
 
     /**
-     * @Post("/threads/{threadId}/comments/{commentId}")
-     */
-    public function putCommentAction(string $threadId, string $commentId, Request $request): Response
-    {
-        list($type, $entityId) = $this->getThreadIdParts($threadId);
-
-        /** @var string $message */
-        $message = $request->request->get('message');
-
-        /** @var Comment $comment */
-        $comment = $this->commentRepository->findCommentById((int) $commentId);
-        $comment->setMessage($message);
-        $this->entityManager->flush();
-
-        if ($referrer = $request->query->get('referrer')) {
-            return new RedirectResponse($referrer);
-        }
-
-        if ('json' === $request->getRequestFormat()) {
-            return $this->handleView($this->view($comment));
-        }
-
-        return new Response(
-            $this->twig->render(
-                $this->getTemplate($type, 'comment'),
-                [
-                    'comment' => $comment,
-                    'threadId' => $threadId,
-                ]
-            )
-        );
-    }
-
-    public function deleteCommentAction(string $threadId, string $commentId, Request $request): Response
-    {
-        /** @var Comment $comment */
-        $comment = $this->commentRepository->findCommentById((int) $commentId);
-
-        $this->entityManager->remove($comment);
-        $this->entityManager->flush();
-
-        if ($referrer = $request->query->get('referrer')) {
-            return new RedirectResponse($referrer);
-        }
-
-        if ('json' === $request->getRequestFormat()) {
-            return $this->handleView($this->view());
-        }
-
-        return new Response();
-    }
-
-    /**
      * @param mixed|null $data
      * @param string|null $statusCode
      * @param mixed[] $headers
